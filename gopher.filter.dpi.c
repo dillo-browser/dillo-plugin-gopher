@@ -1,6 +1,7 @@
 #include <err.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
@@ -422,11 +423,22 @@ static void render_image(int s, const char *url) {
 
 static void fix_path(char *path) {
 	char *query, *start, *end;
+	char buf[3];
 	/* change form input name to query */
 	start = query = strstr(path, "__gopher__query__=");
 	if (!start) return;
 	end = start + 18;
-	while ((*start++ = *end++));
+	while (*end) {
+		if (*end == '%') {
+			strncpy(buf, end + 1, 2);
+			*start++ = strtoul(buf, NULL, 16);
+			end += 2;
+		}
+		else if (*end == '+') *start++ = ' ';
+		else *start++ = *end;
+		end++;
+	}
+	*start = '\0';
 	query[-1] = '\t';
 }
 
