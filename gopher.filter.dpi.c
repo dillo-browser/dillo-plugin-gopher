@@ -194,13 +194,8 @@ static const char *icon(char type) {
 	}
 }
 
-static void render_line_link(char type, const char *title, const char *selector, const char *host, const char *port) {
-	size_t indent = 0;
-	while (*title == ' ') {
-		title++;
-		indent++;
-	}
-	printf("<tr><td>%s</td><td><pre>%*s<a href=\"gopher://", icon(type), indent, "");
+static void print_gopher_url_htmlenc(char type, const char *selector, const char *host, const char *port) {
+	printf("gopher://");
 	if (host) {
 		print_htmlenc(host);
 	}
@@ -214,6 +209,20 @@ static void render_line_link(char type, const char *title, const char *selector,
 	}
 	if (selector) {
 		print_htmlenc(selector);
+	}
+}
+
+static void render_line_link(char type, const char *title, const char *selector, const char *host, const char *port) {
+	size_t indent = 0;
+	while (*title == ' ') {
+		title++;
+		indent++;
+	}
+	printf("<tr><td>%s</td><td><pre>%*s<a href=\"", icon(type), indent, "");
+	if (type == 'h' && !strncmp(selector, "URL:", 4)) {
+		print_htmlenc(selector + 4);
+	} else {
+		print_gopher_url_htmlenc(type, selector, host, port);
 	}
 	printf("\">");
 	if (title) {
@@ -272,19 +281,6 @@ static void render_line_telnet(char type, const char *title, const char *host, c
 	printf("</a></pre></td></tr>\n");
 }
 
-static void render_line_href(char type, const char *title, const char *selector) {
-	size_t indent = 0;
-	while (*title == ' ') {
-		title++;
-		indent++;
-	}
-	printf("<tr><td>%s</td><td><pre>%*s<a href=\"", icon(type), indent, "");
-	print_htmlenc(selector);
-	printf("\">");
-	print_htmlenc(title);
-	printf("</a></pre></td></tr>\n");
-}
-
 static void render_line(char *line, size_t len) {
 	char type, *title, *selector, *host, *port;
 	if (len < 1) return;
@@ -302,16 +298,13 @@ static void render_line(char *line, size_t len) {
 		case 'I':
 		case 'g':
 		case 's':
+		case 'h':
 		case ';':
 			return render_line_link(type, title, selector, host, port);
 		case '7':
 			return render_line_search(type, title, selector, host, port);
 		case '8':
 			return render_line_telnet(type, title, host, port);
-		case 'h':
-			if (*selector == '/') selector++;
-			if (!strncmp(selector, "URL:", 4)) selector += 4;
-			return render_line_href(type, title, selector);
 		case 'i':
 		case '3':
 			return render_line_info(title);
@@ -403,6 +396,11 @@ static void render_binary(int s, const char *url) {
 	read_data(s);
 }
 
+static void render_html(int s, const char *url) {
+	dpi_send_header(url, "text/html");
+	read_data(s);
+}
+
 static const char *detect_image_content_type(const char buf[4]) {
 	if (!strncmp(buf, "GIF8", 4)) return "image/gif";
 	if (!strncmp(buf, "\x89PNG", 4)) return "image/png";
@@ -463,13 +461,14 @@ static void respond(const char *url) {
 	rc = write_all(s, "\r\n", 2);
 	if (rc < 0) return respond_err("write request end");
 	switch (type) {
-		case '1': return render_dir(s, url);
+		case '1':
 		case '7': return render_dir(s, url);
 		case 'g':
 		case 'p':
 		case 'I': return render_image(s, url);
 		case ';':
 		case '9': return render_binary(s, url);
+		case 'h': return render_html(s, url);
 		default: return render_text(s, url);
 	}
 }
