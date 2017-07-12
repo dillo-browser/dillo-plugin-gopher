@@ -179,6 +179,7 @@ static const char *icon(char type) {
 		case '8': // telnet
 			return "<img src=\"data:image/gif;base64,R0lGODlhFAAXAPAAAP///wAAACH5BAAAAAAALAAAAAAUABcAAAJBhI+py+0PT5i0WmpClLrjr3GAN41lKYboGmad63rICZtyWrPza8a2ymORgKMN7IK8xJJI46L1aDGZv6nS2sxsQgUAOw==\">";
 		case 'g':
+		case 'p':
 		case 'I': // image
 			return "<img src=\"data:image/gif;base64,R0lGODdhFAAXAPAAMf///wAAACwAAAAAFAAXAAACQISPqcvtD02YtFYV4EzZZtSBgMdJR2eV5jimJolebXzBsrRhJP6BXk6J+HqnW5E4M844uyPT5XzmhsLj71rDYgsAOw==\">";
 		case 's': // audio
@@ -294,6 +295,7 @@ static void render_line(char *line, size_t len) {
 		case '1':
 		case '5':
 		case '9':
+		case 'p':
 		case 'I':
 		case 'g':
 		case 's':
@@ -451,6 +453,7 @@ static void respond(const char *url) {
 		case '1': return render_dir(s, url);
 		case '7': return render_dir(s, url);
 		case 'g':
+		case 'p':
 		case 'I': return render_image(s, url);
 		case '9': return render_binary(s, url);
 		default: return render_text(s, url);
