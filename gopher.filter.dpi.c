@@ -418,15 +418,13 @@ static void render_image(int s, const char *url) {
 }
 
 static void fix_path(char *path) {
-	char *start, *end;
+	char *query, *start, *end;
 	/* change form input name to query */
-	start = strstr(path, "__gopher__query__=");
+	start = query = strstr(path, "__gopher__query__=");
 	if (!start) return;
 	end = start + 18;
-	do *start++ = *end++;
-	while (*end);
-	if (start[-1] == '?') start--;
-	*start = '\0';
+	while ((*start++ = *end++));
+	query[-1] = '\t';
 }
 
 static void respond(const char *url) {
