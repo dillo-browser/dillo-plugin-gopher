@@ -186,6 +186,8 @@ static const char *icon(char type) {
 			return "<img src=\"data:image/gif;base64,R0lGODlhFAAXAPAAAP///wAAACH5BAAAAAAALAAAAAAUABcAAAJIhI+py+0PTZi02gpCRDRqOS1fJoHjEaJlx5GuBoeYS8KZnNj6bbd73FP9eLzPEFgM/lKolLHGbLagJ1XpFW2MWJvk5YsBiycFADs=\">";
 		case 'h': // web
 			return "<img src=\"data:image/gif;base64,R0lGODdhFAAXAPAAMf///wAAACwAAAAAFAAXAAACQISPqcvtD02YtFYV4Ey5g8x9iOeFovRd5gmWnHWO22HNo0Nh4JKvvE0DynY/Yo/RChJ1RqFpdywOI8OatZa6agsAOw==\">";
+		case ';': // movie
+			return "<img src=\"data:image/gif;base64,R0lGODlhFAAXAPAAAP///wAAACH5BAAAAAAALAAAAAAUABcAAAJAhI+py+0PTZi02gqCvHfr/CmUhzHcZk4empLjwn2qRmfgCsavzpcq/NuFRLIO0PgD4pIJocVWoyF7RWosZ6UUAAA7\">";
 		default:
 			return "";
 	}
@@ -299,6 +301,7 @@ static void render_line(char *line, size_t len) {
 		case 'I':
 		case 'g':
 		case 's':
+		case ';':
 			return render_line_link(type, title, selector, host, port);
 		case '7':
 			return render_line_search(type, title, selector, host, port);
@@ -453,6 +456,7 @@ static void respond(const char *url) {
 		case 'g':
 		case 'p':
 		case 'I': return render_image(s, url);
+		case ';':
 		case '9': return render_binary(s, url);
 		default: return render_text(s, url);
 	}
