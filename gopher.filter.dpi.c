@@ -207,10 +207,8 @@ static void render_line_link(char type, const char *title, const char *selector,
 	if (type) {
 		putchar('/');
 		putchar_htmlenc(type);
-		putchar('/');
 	}
 	if (selector) {
-		if (*selector == '/') selector++;
 		print_htmlenc(selector);
 	}
 	printf("\">");
@@ -237,10 +235,8 @@ static void render_line_search(char type, const char *title, const char *selecto
 	if (type) {
 		putchar('/');
 		putchar_htmlenc(type);
-		putchar('/');
 	}
 	if (selector) {
-		if (*selector == '/') selector++;
 		print_htmlenc(selector);
 	}
 	printf("\"><pre>%*s", indent, "");
