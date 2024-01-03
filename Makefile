@@ -14,6 +14,7 @@ $(DPIDRC):
 
 install-proto: $(DPIDRC)
 	echo 'proto.gopher=gopher/gopher.filter.dpi' >> $<
+	dpidc stop || true
 
 install: $(BIN) install-proto
 	mkdir -p $(DPI_DIR)/$(NAME)
