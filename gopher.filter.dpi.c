@@ -132,6 +132,7 @@ static void parse_line(char *line, char *type, char **title, char **selector, ch
 
 static int putchar_htmlenc(char c) {
 	switch (c) {
+		case '&': return printf("&amp;");
 		case '<': return printf("&lt;");
 		case '>': return printf("&gt;");
 		case '"': return printf("&quot;");
