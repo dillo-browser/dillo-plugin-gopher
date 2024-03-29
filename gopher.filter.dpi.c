@@ -378,7 +378,7 @@ static void read_data(int s) {
 
 static void render_dir(int s, const char *url) {
 	dpi_send_header(url, "text/html");
-	printf("<doctype html>");
+	printf("<!DOCTYPE html>");
 	printf("<html><head><title>");
 	print_htmlenc(url);
 	printf("</title></head><body><table>");
