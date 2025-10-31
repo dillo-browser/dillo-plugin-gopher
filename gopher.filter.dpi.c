@@ -30,15 +30,6 @@ static void respond_err(const char *fmt, ...) {
 	va_end(ap);
 }
 
-static void respond_errx(const char *fmt, ...) {
-	va_list ap;
-	int err = errno;
-	va_start(ap, fmt);
-	dpi_send_header(NULL, "text/plain");
-	vprintf(fmt, ap);
-	va_end(ap);
-}
-
 static int parse_type_path(const char *url, char *type, char *path, size_t path_len) {
 	if (!*url) {
 		*path = '\0';
@@ -159,11 +150,11 @@ static void render_line_unknown(char type, const char *line) {
 	printf("</pre></td></tr>\n");
 }
 
-static void render_line_empty() {
+static void render_line_empty(void) {
 	printf("<tr><td colspan=2></td></tr>\n");
 }
 
-static void render_line_line() {
+static void render_line_line(void) {
 	printf("<tr><td colspan=2><hr></td></tr>\n");
 }
 
@@ -301,22 +292,30 @@ static void render_line(char *line, size_t len) {
 		case 's':
 		case 'h':
 		case ';':
-			return render_line_link(type, title, selector, host, port);
+			render_line_link(type, title, selector, host, port);
+			break;
 		case '7':
-			return render_line_search(type, title, selector, host, port);
+			render_line_search(type, title, selector, host, port);
+			break;
 		case '8':
-			return render_line_telnet(type, title, host, port);
+			render_line_telnet(type, title, host, port);
+			break;
 		case 'i':
 		case '3':
-			return render_line_info(title);
+			render_line_info(title);
+			break;
 		case 'E':
-			return render_line_info(line);
+			render_line_info(line);
+			break;
 		case '.':
-			return render_line_empty();
+			render_line_empty();
+			break;
 		case '_':
-			return render_line_line();
+			render_line_line();
+			break;
 		default:
-			return render_line_unknown(type, line);
+			render_line_unknown(type, line);
+			break;
 	}
 }
 
@@ -350,7 +349,7 @@ static void read_response(int s) {
 		len = sizeof(buf) - end;
 		rc = read_some(s, buf + end, &len);
 		if (rc < 0 && errno == EPIPE) break;
-		if (rc < 0) return warn("read_some");
+		if (rc < 0) { warn("read_some"); return; }
 		end += len;
 		/* read full lines */
 		while ((len = read_line(buf + start, end - start)))	start += len;
@@ -370,9 +369,9 @@ static void read_data(int s) {
 	while (1) {
 		rc = read_some(s, buf, &len);
 		if (rc < 0 && errno == EPIPE) return;
-		if (rc < 0) return warn("read response");
+		if (rc < 0) { warn("read response"); return; }
 		rc = write_all(0, buf, len);
-		if (rc < 0) return warn("write response");
+		if (rc < 0) { warn("write response"); return; }
 	}
 }
 
@@ -413,10 +412,10 @@ static void render_image(int s, const char *url) {
 	int rc;
 	char buf[4];
 	rc = read_all(s, buf, sizeof(buf));
-	if (rc < 0) return respond_err("read image");
+	if (rc < 0) { respond_err("read image"); return; }
 	dpi_send_header(url, detect_image_content_type(buf));
 	rc = write_all(0, buf, 4);
-	if (rc < 0) return warn("write image");
+	if (rc < 0) { warn("write image"); return; }
 	read_data(s);
 }
 
@@ -450,31 +449,41 @@ static void respond(const char *url) {
 	char path[4096];
 	int s;
 	rc = parse_url(url, host, sizeof(host), port, sizeof(port), &type, path, sizeof(path));
-	if (rc < 0) return respond_err("parse_url");
+	if (rc < 0) { respond_err("parse_url"); return; }
 	if (!*host) strcpy(host, "127.0.0.1");
 	if (!*port) strcpy(port, "70");
 	if (!type) type = '1';
 	if (*path) fix_path(path);
 	s = tcp_connect(host, port, &errstr);
-	if (s < 0) return respond_errstr(errstr, "tcp_connect");
+	if (s < 0) { respond_errstr(errstr, "tcp_connect"); return; }
 	rc = write_all(s, path, strlen(path));
-	if (rc < 0) return respond_err("write request");
+	if (rc < 0) { respond_err("write request"); return; }
 	rc = write_all(s, "\r\n", 2);
-	if (rc < 0) return respond_err("write request end");
+	if (rc < 0) { respond_err("write request end"); return; }
 	switch (type) {
 		case '1':
-		case '7': return render_dir(s, url);
+		case '7':
+			render_dir(s, url);
+			break;
 		case 'g':
 		case 'p':
-		case 'I': return render_image(s, url);
+		case 'I':
+			render_image(s, url);
+			break;
 		case ';':
-		case '9': return render_binary(s, url);
-		case 'h': return render_html(s, url);
-		default: return render_text(s, url);
+		case '9':
+			render_binary(s, url);
+			break;
+		case 'h':
+			render_html(s, url);
+			break;
+		default:
+			render_text(s, url);
+			break;
 	}
 }
 
-int main() {
+int main(void) {
 	char url[1024];
 	setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 	dpi_read_request(url, sizeof(url));

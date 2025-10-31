@@ -6,7 +6,7 @@
 #include "dpi.h"
 #include "io.h"
 
-static void check_auth() {
+static void check_auth(void) {
 	char buf[31];
 	int rc;
 	unsigned int key, local_key;
@@ -33,7 +33,7 @@ static void get_url(char *url_buf, size_t url_len) {
 	char buf[21];
 	size_t len;
 	int rc;
-	int i;
+	size_t i;
 
 	rc = read_all(STDIN_FILENO, buf, sizeof(buf));
 	if (rc < 0) err(1, "read open_url");
