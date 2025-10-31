@@ -9,24 +9,24 @@
 static void check_auth() {
 	char buf[31];
 	int rc;
-	char key[4], local_key[4];
+	unsigned int key, local_key;
 	char keys[128];
 	char *home;
 	ssize_t sz;
 	rc = read_all(STDIN_FILENO, buf, 29);
 	if (rc < 0) err(1, "read auth");
 	buf[30] = '\0';
-	rc = sscanf(buf, "<cmd='auth' msg='%4x' '>", (unsigned int *) key);
+	rc = sscanf(buf, "<cmd='auth' msg='%4x' '>", &key);
 	if (rc < 0) err(1, "auth: %.*s", 29, buf);
 	if (rc < 1) errx(1, "auth: %.*s", 29, buf);
 	home = getenv("HOME");
 	if (!home) home = ".";
 	sz = read_file(keys, sizeof(keys), "%s/.dillo/dpid_comm_keys", home);
 	if (sz < 0) err(1, "read dillo comm keys");
-	rc = sscanf(keys, "%*d %4x' '>", (unsigned int *) local_key);
+	rc = sscanf(keys, "%*d %4x' '>", &local_key);
 	if (rc < 0) err(1, "comm key: %.*s", (int) sz, keys);
 	if (rc < 1) errx(1, "comm key: %.*s", (int) sz, keys);
-	if (memcmp(key, local_key, 4)) errx(1, "wrong dillo key");
+	if (key != local_key) errx(1, "wrong dillo key");
 }
 
 static void get_url(char *url_buf, size_t url_len) {
