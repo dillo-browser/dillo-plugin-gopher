@@ -214,7 +214,7 @@ static void print_gopher_url_htmlenc(char type, const char *selector, const char
 }
 
 static void render_line_link(char type, const char *title, const char *selector, const char *host, const char *port) {
-	size_t indent = 0;
+	int indent = 0;
 	while (*title == ' ') {
 		title++;
 		indent++;
@@ -233,7 +233,7 @@ static void render_line_link(char type, const char *title, const char *selector,
 }
 
 static void render_line_search(char type, const char *title, const char *selector, const char *host, const char *port) {
-	size_t indent = 0;
+	int indent = 0;
 	while (*title == ' ') {
 		title++;
 		indent++;
@@ -262,7 +262,7 @@ static void render_line_search(char type, const char *title, const char *selecto
 }
 
 static void render_line_telnet(char type, const char *title, const char *host, const char *port) {
-	size_t indent = 0;
+	int indent = 0;
 	while (*title == ' ') {
 		title++;
 		indent++;
