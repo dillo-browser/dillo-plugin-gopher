@@ -7,7 +7,7 @@
 #include "io.h"
 
 static void check_auth() {
-	char buf[30];
+	char buf[31];
 	int rc;
 	char key[4], local_key[4];
 	char keys[128];
@@ -16,16 +16,16 @@ static void check_auth() {
 	rc = read_all(STDIN_FILENO, buf, 29);
 	if (rc < 0) err(1, "read auth");
 	buf[30] = '\0';
-	rc = sscanf(buf, "<cmd='auth' msg='%4x' '>", key);
+	rc = sscanf(buf, "<cmd='auth' msg='%4x' '>", (unsigned int *) key);
 	if (rc < 0) err(1, "auth: %.*s", 29, buf);
 	if (rc < 1) errx(1, "auth: %.*s", 29, buf);
 	home = getenv("HOME");
 	if (!home) home = ".";
 	sz = read_file(keys, sizeof(keys), "%s/.dillo/dpid_comm_keys", home);
 	if (sz < 0) err(1, "read dillo comm keys");
-	rc = sscanf(keys, "%*d %4x' '>", local_key);
-	if (rc < 0) err(1, "comm key: %.*s", sz, keys);
-	if (rc < 1) errx(1, "comm key: %.*s", sz, keys);
+	rc = sscanf(keys, "%*d %4x' '>", (unsigned int *) local_key);
+	if (rc < 0) err(1, "comm key: %.*s", (int) sz, keys);
+	if (rc < 1) errx(1, "comm key: %.*s", (int) sz, keys);
 	if (memcmp(key, local_key, 4)) errx(1, "wrong dillo key");
 }
 
@@ -38,7 +38,7 @@ static void get_url(char *url_buf, size_t url_len) {
 	rc = read_all(STDIN_FILENO, buf, sizeof(buf));
 	if (rc < 0) err(1, "read open_url");
 	if (strncmp(buf, "<cmd='open_url' url='", 21)) {
-		err(1, "bad open_url cmd: %.*s", sizeof(buf), buf);
+		err(1, "bad open_url cmd: %.*s", (int) sizeof(buf), buf);
 	}
 	len = url_len;
 	rc = read_some(STDIN_FILENO, url_buf, &len);
@@ -48,7 +48,7 @@ static void get_url(char *url_buf, size_t url_len) {
 		if (url_buf[i] == '\'' && url_buf[i+1] == ' ') break;
 	}
 	if (i > len-3 || strncmp(url_buf + i, "' '>", 4)) {
-		err(1, "bad url end: %.*s", len, url_buf);
+		err(1, "bad url end: %.*s", (int) len, url_buf);
 	}
 	url_buf[i] = '\0';
 }
