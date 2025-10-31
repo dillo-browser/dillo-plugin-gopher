@@ -11,7 +11,7 @@
 
 #include "io.h"
 
-int read_all(int fd, unsigned char *buf, size_t len) {
+int read_all(int fd, char *buf, size_t len) {
 	ssize_t nbytes;
 	while (len > 0) {
 		nbytes = read(fd, buf, len);
@@ -24,7 +24,7 @@ int read_all(int fd, unsigned char *buf, size_t len) {
 	return 0;
 }
 
-int read_some(int fd, unsigned char *buf, size_t *lenp) {
+int read_some(int fd, char *buf, size_t *lenp) {
 	ssize_t nbytes;
 	do nbytes = read(fd, buf, *lenp);
 	while (nbytes < 0 && errno == EINTR);
@@ -34,7 +34,7 @@ int read_some(int fd, unsigned char *buf, size_t *lenp) {
 	return 0;
 }
 
-int write_all(int fd, const unsigned char *buf, size_t count) {
+int write_all(int fd, const char *buf, size_t count) {
 	ssize_t nbytes;
 	while (count > 0) {
 		nbytes = write(fd, buf, count);
