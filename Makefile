@@ -5,6 +5,7 @@ DILLO_PREFIX ?=
 DILLO_DIR = ~/.dillo
 DPI_DIR = $(DILLO_DIR)/dpi
 DPIDRC = $(DILLO_DIR)/dpidrc
+CFLAGS = -std=c99 -D_POSIX_C_SOURCE=200112L
 
 all: $(BIN)
 
