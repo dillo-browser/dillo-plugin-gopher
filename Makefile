@@ -1,6 +1,7 @@
 NAME = gopher
 BIN = gopher.filter.dpi
 OBJ = gopher.filter.dpi.o io.o dpi.o
+DILLO_PREFIX ?=
 DILLO_DIR = ~/.dillo
 DPI_DIR = $(DILLO_DIR)/dpi
 DPIDRC = $(DILLO_DIR)/dpidrc
@@ -10,7 +11,12 @@ all: $(BIN)
 $(BIN): $(OBJ)
 
 $(DPIDRC):
-	cp /etc/dillo/dpidrc $@
+	if [ ! -f $(DILLO_PREFIX)/etc/dillo/dpidrc ]; then \
+		echo "Can't find $(DILLO_PREFIX)/etc/dillo/dpidrc, is dillo installed?"; \
+		echo "If so, set DILLO_PREFIX to the installation prefix of dillo"; \
+		false; \
+	fi
+	cp $(DILLO_PREFIX)/etc/dillo/dpidrc $@
 
 install-proto: $(DPIDRC)
 	echo 'proto.gopher=gopher/gopher.filter.dpi' >> $<
